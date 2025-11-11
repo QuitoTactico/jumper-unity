@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 7250100370807159777}
   - component: {fileID: 4862041062437523243}
   - component: {fileID: 7688679327655170960}
+  - component: {fileID: 8767254692596627026}
+  - component: {fileID: 3739407200609937851}
   m_Layer: 0
   m_Name: JewelPickUp
   m_TagString: PickUp
@@ -136,3 +138,29 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.33287996, y: 0.37048188}
   m_EdgeRadius: 0
+--- !u!114 &8767254692596627026
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6375281668053020414}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5eecf3c23810c3409a8418a77bd73bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VerticalOscillator
+  amplitude: 0.1
+  frequency: 5
+--- !u!114 &3739407200609937851
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6375281668053020414}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e425d9c2c663df34795719381878bf90, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HorizontalRotator

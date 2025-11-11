@@ -122,11 +122,6 @@ public class PlayerController : MonoBehaviour
         {
             other.gameObject.SetActive(false);
         }
-
-        if (other.gameObject.CompareTag("OutOfBounds"))
-        {
-            Die();
-        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)  // Cambié Collision a Collision2D
