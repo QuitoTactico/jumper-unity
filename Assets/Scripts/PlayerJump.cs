@@ -27,6 +27,9 @@ public class PlayerJump : MonoBehaviour
     public int extraJumps = 1; 
     private int extraJumpsValue;
 
+    // Animation
+    private PlayerAnimator playerAnimator;
+
     // Input System
     private InputSystem_Actions inputActions;
 
@@ -49,6 +52,7 @@ public class PlayerJump : MonoBehaviour
     { 
         rb = GetComponent<Rigidbody2D>(); 
         extraJumpsValue = extraJumps; // Set initial jumps 
+        playerAnimator = GetComponent<PlayerAnimator>(); // Get animator reference
     } 
  
     void Update() 
@@ -86,12 +90,18 @@ public class PlayerJump : MonoBehaviour
                 rb.velocity = new Vector2(rb.velocity.x, jumpForce); 
                 coyoteTimeCounter = 0f; // Consume coyote time 
                 jumpBufferCounter = 0f; // Consume buffer 
+                
+                // Trigger jump animation
+                if (playerAnimator != null) playerAnimator.TriggerJump();
             } 
             else if (extraJumpsValue > 0) // Priority 2: Air Jump 
             { 
                 rb.velocity = new Vector2(rb.velocity.x, jumpForce); // You could use a different jump force
                 extraJumpsValue--; // Consume an air jump 
                 jumpBufferCounter = 0f; // Consume buffer 
+                
+                // Trigger jump animation
+                if (playerAnimator != null) playerAnimator.TriggerJump();
             } 
         } 
     } 
