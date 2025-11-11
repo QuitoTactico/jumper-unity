@@ -29,36 +29,28 @@ public class PlayerJump : MonoBehaviour
     {
         inputActions.Player.Disable();
     }
- 
-    void Start() 
-    { 
-        rb = GetComponent<Rigidbody2D>(); 
+
+    void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
     } 
  
+    // siempre usar inputActions.Player.Jump.WasPressedThisFrame()
     void Update() 
     { 
-        // Check for ground 
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
-        
-        Debug.Log($"Is Grounded: {isGrounded}");
-        Debug.Log($"Ground Check Position: {groundCheck.position}");
-    
-        // --- Basic Jump Input --- 
-        if (inputActions.Player.Jump.WasPressedThisFrame())
-        {
-            Debug.Log("Jump button pressed!");
-            
-            if (isGrounded)
-            {
-                Debug.Log($"Jumping! Current velocity: {rb.velocity}, Jump force: {jumpForce}");
-                rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-                Debug.Log($"New velocity after jump: {rb.velocity}");
-            }
-            else
-            {
-                Debug.Log("Can't jump - not grounded!");
-            }
-        }
+        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer); 
+
+        if (inputActions.Player.Jump.WasPressedThisFrame() && isGrounded) 
+        { 
+            rb.velocity = new Vector2(rb.velocity.x, jumpForce); 
+        } 
+ 
+        // --- Variable Jump Height --- 
+        if (inputActions.Player.Jump.WasReleasedThisFrame() && rb.velocity.y > 0f) 
+        { 
+            // If the button is released while jumping, cut the upward velocity 
+            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f); 
+        } 
     }
  
     // Helper function to visualize the ground check radius in the Scene view 
