@@ -12,11 +12,8 @@ public class PlayerAnimator : MonoBehaviour
     public float groundCheckRadius = 0.2f;
     private bool isGrounded;
     
-    // Animation Parameters (nombres de los parámetros en el Animator Controller)
-    private readonly string SPEED_PARAM = "Speed";
-    private readonly string GROUNDED_PARAM = "Grounded";
-    private readonly string VERTICAL_VELOCITY_PARAM = "VerticalVelocity";
-    private readonly string JUMP_PARAM = "Jump";
+    // Movement threshold - velocidad mínima para considerar que está corriendo
+    public float movementThreshold = 0.1f;
     
     void Start() 
     { 
@@ -53,15 +50,25 @@ public class PlayerAnimator : MonoBehaviour
         
         // --- Update Animation Parameters ---
         
-        // Speed (for run animation) - usa el valor absoluto de la velocidad horizontal
+        // Determinar si está corriendo o idle
         float speed = Mathf.Abs(rb.velocity.x);
-        animator.SetFloat(SPEED_PARAM, speed);
+        bool isMoving = speed > movementThreshold;
         
-        // Grounded state
-        animator.SetBool(GROUNDED_PARAM, isGrounded);
+        // Debug para ver los valores (puedes comentarlo después)
+        // Debug.Log($"Speed: {speed}, IsMoving: {isMoving}, IsGrounded: {isGrounded}, VelocityY: {rb.velocity.y}");
         
-        // Vertical velocity (for jump/fall animations)
-        animator.SetFloat(VERTICAL_VELOCITY_PARAM, rb.velocity.y);
+        // Intentar con diferentes nombres de parámetros comunes
+        // El Animator Controller puede tener diferentes nombres
+        SetFloatIfExists("Speed", speed);
+        SetFloatIfExists("MotionSpeed", speed);
+        
+        SetBoolIfExists("Grounded", isGrounded);
+        SetBoolIfExists("IsGrounded", isGrounded);
+        
+        SetFloatIfExists("VerticalVelocity", rb.velocity.y);
+        SetFloatIfExists("Jump", rb.velocity.y);
+        
+        SetBoolIfExists("FreeFall", !isGrounded && rb.velocity.y < -0.1f);
     }
     
     // Llamar este método cuando el jugador salte (desde PlayerJump)
@@ -69,7 +76,57 @@ public class PlayerAnimator : MonoBehaviour
     {
         if (animator != null)
         {
-            animator.SetTrigger(JUMP_PARAM);
+            SetTriggerIfExists("Jump");
+        }
+    }
+    
+    // Animation Events - llamados por las animaciones
+    public void OnFootstep()
+    {
+        // Aquí puedes agregar sonidos de pasos si quieres
+        // Debug.Log("Footstep!");
+    }
+    
+    public void OnLand()
+    {
+        // Aquí puedes agregar sonidos de aterrizaje si quieres
+        // Debug.Log("Landed!");
+    }
+    
+    // Helper methods para setear parámetros solo si existen
+    private void SetFloatIfExists(string paramName, float value)
+    {
+        foreach (AnimatorControllerParameter param in animator.parameters)
+        {
+            if (param.name == paramName && param.type == AnimatorControllerParameterType.Float)
+            {
+                animator.SetFloat(paramName, value);
+                return;
+            }
+        }
+    }
+    
+    private void SetBoolIfExists(string paramName, bool value)
+    {
+        foreach (AnimatorControllerParameter param in animator.parameters)
+        {
+            if (param.name == paramName && param.type == AnimatorControllerParameterType.Bool)
+            {
+                animator.SetBool(paramName, value);
+                return;
+            }
+        }
+    }
+    
+    private void SetTriggerIfExists(string paramName)
+    {
+        foreach (AnimatorControllerParameter param in animator.parameters)
+        {
+            if (param.name == paramName && param.type == AnimatorControllerParameterType.Trigger)
+            {
+                animator.SetTrigger(paramName);
+                return;
+            }
         }
     }
 }
