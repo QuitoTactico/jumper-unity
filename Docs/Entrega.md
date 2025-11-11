@@ -1,4 +1,10 @@
-# Ejercicios
+# Notas
+
+```csharp
+    // siempre usar inputActions.Player.Jump.WasPressedThisFrame()
+```
+
+## Ejercicios
 
 Siguiendo el tutorial hecho a partir del video implemente la mecánica de salto básica que parametriza  el salto usando la distancia y altura vertical. Utilice el plugin de Cinemachine para hacer que la cámara siga al personaje con un poco de rezago.
 

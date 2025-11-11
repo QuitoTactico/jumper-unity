@@ -1,18 +1,33 @@
-using UnityEngine; 
+using UnityEngine;
 using UnityEngine.InputSystem;
- 
+
 public class PlayerJump : MonoBehaviour 
 { 
-    public Rigidbody2D rb; 
+    // Jump & Physics 
+    private Rigidbody2D rb; 
     public float jumpForce = 10f; 
+    public float fallMultiplier = 2.5f; 
+    public float lowJumpMultiplier = 2f; 
  
-    // Ground Check variables 
+    // Ground Check 
     public Transform groundCheck; 
     public LayerMask groundLayer; 
-    private bool isGrounded;
     public float groundCheckRadius = 0.2f; 
-    
-    
+    private bool isGrounded; 
+ 
+    // Coyote Time 
+    private float coyoteTime = 0.15f; 
+    private float coyoteTimeCounter; 
+ 
+    // Jump Buffering 
+    private float jumpBufferTime = 0.15f; 
+    private float jumpBufferCounter; 
+ 
+    // Double Jump 
+    public int extraJumps = 1; 
+    private int extraJumpsValue;
+
+    // Input System
     private InputSystem_Actions inputActions;
 
     void Awake()
@@ -29,29 +44,72 @@ public class PlayerJump : MonoBehaviour
     {
         inputActions.Player.Disable();
     }
-
-    void Start()
-    {
-        rb = GetComponent<Rigidbody2D>();
+ 
+    void Start() 
+    { 
+        rb = GetComponent<Rigidbody2D>(); 
+        extraJumpsValue = extraJumps; // Set initial jumps 
     } 
  
-    // siempre usar inputActions.Player.Jump.WasPressedThisFrame()
     void Update() 
     { 
+        // --- Ground Check --- 
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer); 
-
-        if (inputActions.Player.Jump.WasPressedThisFrame() && isGrounded) 
+ 
+        // --- Coyote Time & Double Jump Reset --- 
+        if (isGrounded) 
         { 
-            rb.velocity = new Vector2(rb.velocity.x, jumpForce); 
+            coyoteTimeCounter = coyoteTime; 
+            extraJumpsValue = extraJumps; // Reset double jumps 
+        } 
+        else 
+        { 
+            coyoteTimeCounter -= Time.deltaTime; 
         } 
  
-        // --- Variable Jump Height --- 
-        if (inputActions.Player.Jump.WasReleasedThisFrame() && rb.velocity.y > 0f) 
+        // --- Jump Buffering --- 
+        // siempre usar inputActions.Player.Jump.WasPressedThisFrame()
+        if (inputActions.Player.Jump.WasPressedThisFrame()) 
         { 
-            // If the button is released while jumping, cut the upward velocity 
-            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f); 
+            jumpBufferCounter = jumpBufferTime; 
         } 
-    }
+        else 
+        { 
+            jumpBufferCounter -= Time.deltaTime; 
+        } 
+ 
+        // --- COMBINED Jump Input Check --- 
+        if (jumpBufferCounter > 0f) 
+        { 
+            if (coyoteTimeCounter > 0f) // Priority 1: Ground Jump (uses coyote time) 
+            { 
+                rb.velocity = new Vector2(rb.velocity.x, jumpForce); 
+                coyoteTimeCounter = 0f; // Consume coyote time 
+                jumpBufferCounter = 0f; // Consume buffer 
+            } 
+            else if (extraJumpsValue > 0) // Priority 2: Air Jump 
+            { 
+                rb.velocity = new Vector2(rb.velocity.x, jumpForce); // You could use a different jump force
+                extraJumpsValue--; // Consume an air jump 
+                jumpBufferCounter = 0f; // Consume buffer 
+            } 
+        } 
+    } 
+ 
+    void FixedUpdate() 
+    { 
+        // --- Better Falling Logic --- 
+        if (rb.velocity.y < 0) 
+        { 
+            // We are falling - apply the fallMultiplier 
+            rb.velocity += Vector2.up * Physics2D.gravity.y * (fallMultiplier - 1) * Time.fixedDeltaTime; 
+        } 
+        else if (rb.velocity.y > 0 && !inputActions.Player.Jump.IsPressed()) 
+        { 
+            // We are rising, but not holding Jump - apply the lowJumpMultiplier 
+            rb.velocity += Vector2.up * Physics2D.gravity.y * (lowJumpMultiplier - 1) * Time.fixedDeltaTime; 
+        } 
+    } 
  
     // Helper function to visualize the ground check radius in the Scene view 
     private void OnDrawGizmosSelected() 
